@@ -1,7 +1,8 @@
 -- My AOS PID : Fw8GRIa8aMxU_FyPEs2fsfjF7OYa0_7OHJ7KEATJhTM
 
 -- Adaptive Learning from Opponents
--- Dynamic Energy Management:
+-- Dynamic Energy Management
+-- Defensive Maneuvering
 
 -- Initializing global variables to store the latest game state and game host process.
 LatestGameState = {}  -- Stores all game data
@@ -117,6 +118,21 @@ function dynamicEnergyManagement()
   return false
 end
 
+-- Defensive maneuvering
+function defensiveManeuvering()
+  local player = LatestGameState.Players[ao.id]
+  for target, state in pairs(LatestGameState.Players) do
+    if target ~= ao.id and inRange(player.x, player.y, state.x, state.y, 2) and state.energy > player.energy then
+      print(colors.blue .. "Enemy too close. Performing defensive maneuver." .. colors.reset)
+      local direction = calculateOppositeDirection(player.x, player.y, state.x, state.y)
+      ao.send({Target = Game, Action = "PlayerMove", Player = ao.id, Direction = direction})
+      InAction = false
+      return true
+    end
+  end
+  return false
+end
+
 -- Calculate direction to move towards target position
 function calculateDirection(x1, y1, x2, y2)
   if x1 < x2 then
@@ -127,6 +143,19 @@ function calculateDirection(x1, y1, x2, y2)
     return "Down"
   else
     return "Up"
+  end
+end
+
+-- Calculate direction to move away from target position
+function calculateOppositeDirection(x1, y1, x2, y2)
+  if x1 < x2 then
+    return "Left"
+  elseif x1 > x2 then
+    return "Right"
+  elseif y1 < y2 then
+    return "Up"
+  else
+    return "Down"
   end
 end
 
@@ -202,6 +231,11 @@ Handlers.add(
 
     -- Check for dynamic energy management
     if dynamicEnergyManagement() then
+      return
+    end
+
+    -- Check for defensive maneuvering
+    if defensiveManeuvering() then
       return
     end
 
