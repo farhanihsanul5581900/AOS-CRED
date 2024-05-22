@@ -224,4 +224,15 @@ Handlers.add(
         ao.send({Target = Game, Action = "Attack-Failed", Reason = "Unable to read energy."})
       elseif playerEnergy == 0 then
         print(colors.red .. "Player has insufficient energy." .. colors.reset)
-        ao.send
+        ao.send({Target = Game, Action = "Attack-Failed", Reason = "Player has no energy."})
+      else
+        print(colors.red .. "Returning attack." .. colors.reset)
+        ao.send({Target = Game, Action = "PlayerAttack", Player = ao.id, AttackEnergy = tostring(playerEnergy)})
+      end
+      InAction = false
+      ao.send({Target = ao.id, Action = "Tick"})
+    else
+      print("Previous action still in progress. Skipping.")
+    end
+  end
+)
